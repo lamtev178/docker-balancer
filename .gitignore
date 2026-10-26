@@ -1,0 +1,7 @@
+nginx/ssl/
+
+*.key
+*.crt
+*.pem
+*.p12
+*.pfx

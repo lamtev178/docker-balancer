@@ -1,0 +1,74 @@
+services:
+  frontend:
+    build: ./frontend
+    container_name: frontend
+    expose:
+      - "80"
+    networks:
+      - backend-net
+
+  node-app1:
+    build: ./app
+    container_name: node-app1
+    environment:
+      - APP_NAME=node-app1
+    expose:
+      - "3000"
+    networks:
+      - backend-net
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000', r => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+  node-app2:
+    build: ./app
+    container_name: node-app2
+    environment:
+      - APP_NAME=node-app2
+    expose:
+      - "3000"
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000', r => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - backend-net
+
+  node-app3:
+    build: ./app
+    container_name: node-app3
+    environment:
+      - APP_NAME=node-app3
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000', r => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    expose:
+      - "3000"
+    networks:
+      - backend-net
+
+  nginx:
+    image: nginx:alpine
+    container_name: nginx-balancer
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      node-app1:
+        condition: service_healthy
+      node-app2:
+        condition: service_healthy
+      node-app3:
+        condition: service_healthy
+    networks:
+      - backend-net
+networks:
+  backend-net:
+    driver: bridge

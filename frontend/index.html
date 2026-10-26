@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>DevOps app</title>
+</head>
+<body>
+<h1>Frontend is working</h1>
+<p id='dd'>Loading backend....</p>
+<script>
+fetch('/api')
+	.then(res => res.text())
+	.then(text => document.getElementById('dd').innerText = text)
+	.catch(err => document.getElementById('dd').innerText = 'Error: ' + err);
+</script>
+</body>
+</html>
